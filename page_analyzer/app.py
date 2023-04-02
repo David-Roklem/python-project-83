@@ -1,12 +1,12 @@
 import os
 from flask import Flask
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 
-load_dotenv()
-SECRET_KEY = os.getenv('SECRET_KEY')
+# load_dotenv()
+# SECRET_KEY = os.getenv('SECRET_KEY')
 app = Flask(__name__)
-app.config.update(SECRET_KEY=SECRET_KEY)
+# app.config.update(SECRET_KEY=SECRET_KEY)
 
 
 @app.route('/')
