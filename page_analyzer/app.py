@@ -11,4 +11,4 @@ app.config.update(SECRET_KEY=SECRET_KEY)
 
 @app.route('/')
 def index():
-    '<h1>Hello, the third project. Be kind to your lord!</h1>'
+    return '<h1>Hello, the third project. Be kind to your lord!</h1>'
