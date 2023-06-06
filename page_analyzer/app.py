@@ -31,9 +31,30 @@ def index():
     )
 
 
-@app.post('/')
-def get_url():
-    url = request.form.to_dict().get('url')
+@app.get('/urls')
+def get_urls():
+    conn = psycopg2.connect(DATABASE_URL)
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute('SELECT * FROM urls ORDER BY id DESC')
+                result = cur.fetchall()
+                #  print(result) scheme: [(47, 'https://autoreview.ru', datetime.date(2023, 6, 5)), ...]
+    except psycopg2.Error:
+        return None
+    finally:
+        conn.close()
+    return render_template(
+        'urls/urls.html',
+        data=result
+        # checks=result['checks'],
+        # codes=result['status_codes']
+    )
+
+
+@app.post('/urls')
+def post_url():
+    url = request.form.to_dict().get('url')  # e.g. https://www.avito.ru/
     error_messages = list()
     if validate(url):
         for message in validate(url):
@@ -50,59 +71,63 @@ def get_url():
     try:
         with conn:
             with conn.cursor() as cur:
-                cur.execute('''
-                    CREATE TABLE IF NOT EXISTS urls (
+                cur.execute(
+                    '''CREATE TABLE IF NOT EXISTS urls (
                     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-                    name varchar(255),
-                    created_at date
-                );''')
+                    name varchar(255) NOT NULL,
+                    created_at date NOT NULL
+                    );'''
+                )
                 cur.execute(
                     'SELECT id FROM urls WHERE name = %s LIMIT 1',
                     (name,)
                 )
                 data = cur.fetchone()
+                # print('DATA: ', data)
                 if data:
                     flash('Страница уже существует', 'info')
-                    return data[0]
+                    return redirect(url_for('get_url', id=data[0]))
                 cur.execute('''
                     INSERT INTO urls (name, created_at)
                     VALUES (%s, %s) RETURNING id;
                     ''',
                     (name, created_at))
                 url_id = cur.fetchone()[0]
+                # print('URL_ID: ', url_id)
                 flash('Страница успешно добавлена', 'success')
     except psycopg2.Error:
         return None
     finally:
         conn.close()
 
-    return render_template(
-        'show.html',
-        data=data,
-        url_id=url_id
-    )
-
+    return redirect(url_for('get_url', id=url_id))
+    # return render_template(
+    #     'urls/urls_id.html',
+    #     data=data,
+    #     url_id=url_id
+    # )
 
 
 @app.route('/urls/<id>')
-def show_url(id):
+def get_url(id):
     conn = psycopg2.connect(DATABASE_URL)
-    cur = conn.cursor()
-    cur.execute('SELECT * FROM urls;')
-    websites = cur.fetchall()
-    cur.close()
-    conn.close()
-    id = websites[0][0]
-    website_name = websites[0][1]
-    creation_date = websites[0][2]
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    'SELECT id, name, created_at FROM urls WHERE id = %s LIMIT 1',
+                    (str(id),)
+                )
+                result = cur.fetchone()
+                print(result)
+    except psycopg2.Error:
+        return None
+    finally:
+        conn.close()
     return render_template(
-        'show.html',
-        success_message=success_message,
-        id=id,
-        website_name=website_name,
-        creation_date=creation_date
-    )
-    
+                    'urls/urls_id.html',
+                    result=result
+                )
 
 
 def validate(url_from_request):

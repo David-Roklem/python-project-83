@@ -1,5 +1,5 @@
-CREATE TABLE urls (
+CREATE TABLE IF NOT EXTISTS urls (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    name varchar(255),
-    created_at date
+    name varchar(255) NOT NULL,
+    created_at date NOT NULL
 );
