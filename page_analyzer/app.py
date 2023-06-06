@@ -72,13 +72,6 @@ def post_url():
         with conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    '''CREATE TABLE IF NOT EXISTS urls (
-                    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-                    name varchar(255) NOT NULL,
-                    created_at date NOT NULL
-                    );'''
-                )
-                cur.execute(
                     'SELECT id FROM urls WHERE name = %s LIMIT 1',
                     (name,)
                 )
