@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 import psycopg2
 from psycopg2 import extras
 from urllib.parse import urlparse
+import requests
 
 
 load_dotenv()
@@ -115,7 +116,7 @@ def get_url(id):
                 result = cur.fetchone()
                 # print(result)  (7, 'https://www.avito.ru', datetime.date(2023, 6, 6))
                 cur.execute(
-                    'SELECT id, url_id, created_at FROM url_checks WHERE url_id = %s ORDER BY id DESC',
+                    'SELECT id, url_id, status_code, created_at FROM url_checks WHERE url_id = %s ORDER BY id DESC',
                     (id,)
                 )
                 checks = cur.fetchall()
@@ -144,11 +145,22 @@ def url_checks(id):
                     'SELECT id, name, created_at FROM urls WHERE id = %s LIMIT 1',
                     (id,)
                 )
+                url  = cur.fetchone().name
+                # print(url):  e.g. https://www.avito.ru
+                try:
+                    r = requests.get(url)
+                    r.raise_for_status()
+                except requests.exceptions.RequestException as error:
+                    flash('Произошла ошибка при проверке', 'danger')
+                    return redirect(url_for('get_url', id=id))
+                status_code = r.status_code
+                # print(response):  e.g. 403 or 200
+                
                 cur.execute('''
-                    INSERT INTO url_checks (url_id, created_at) values
-                    (%s, %s)
+                    INSERT INTO url_checks (url_id, status_code, created_at) values
+                    (%s, %s, %s)
                     ''',
-                    (id, datetime.datetime.now().date(),)
+                    (id, status_code, datetime.datetime.now().date(),)
                 )
                 flash('Страница успешно проверена', 'success')
             conn.commit()
