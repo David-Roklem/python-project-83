@@ -135,44 +135,27 @@ def get_url(id):
 @app.post('/urls/<int:id>')
 def url_checks(id):
     conn = psycopg2.connect(DATABASE_URL)
-    with conn:
-        with conn.cursor() as cur:
-            cur.execute(
+    try:
+        with conn:
+            with conn.cursor(
+                cursor_factory=extras.NamedTupleCursor
+            ) as cur:
+                cur.execute(
                     'SELECT id, name, created_at FROM urls WHERE id = %s LIMIT 1',
                     (id,)
                 )
-            cur.execute('''
+                cur.execute('''
                     INSERT INTO url_checks (url_id, created_at) values
                     (%s, %s)
                     ''',
                     (id, datetime.datetime.now().date(),)
                 )
-    flash('Страница успешно проверена', 'success')
-    conn.commit()
-    conn.close()
-    # try:
-    #     with conn:
-    #         with conn.cursor(
-    #             cursor_factory=extras.NamedTupleCursor
-    #         ) as cur:
-    #             cur.execute(
-    #                 'SELECT id, name, created_at FROM urls WHERE id = %s LIMIT 1',
-    #                 (id,)
-    #             )
-    #             url = cur.fetchone()
-
-    #             cur.execute('''
-    #                 INSERT INTO url_checks (url_id, created_at) values
-    #                 (%s, %s)
-    #                 ''',
-    #                 (id, datetime.datetime.now().date(),)
-    #             )
-    #             flash('Страница успешно проверена', 'success')
-    #         conn.commit()
-    # except psycopg2.Error:
-    #     return None
-    # finally:
-    #     conn.close()
+                flash('Страница успешно проверена', 'success')
+            conn.commit()
+    except psycopg2.Error:
+        return None
+    finally:
+        conn.close()
     return redirect(url_for('get_url', id=id))
 
 
