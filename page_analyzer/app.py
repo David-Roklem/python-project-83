@@ -12,6 +12,7 @@ import datetime
 import validators
 from dotenv import load_dotenv
 import psycopg2
+from psycopg2 import extras
 from urllib.parse import urlparse
 
 
@@ -101,26 +102,78 @@ def post_url():
     # )
 
 
-@app.route('/urls/<id>')
+@app.get('/urls/<int:id>')
 def get_url(id):
     conn = psycopg2.connect(DATABASE_URL)
     try:
         with conn:
-            with conn.cursor() as cur:
+            with conn.cursor(cursor_factory=extras.NamedTupleCursor) as cur:
                 cur.execute(
                     'SELECT id, name, created_at FROM urls WHERE id = %s LIMIT 1',
-                    (str(id),)
+                    (id,)
                 )
                 result = cur.fetchone()
-                print(result)
+                # print(result)  (7, 'https://www.avito.ru', datetime.date(2023, 6, 6))
+                cur.execute(
+                    'SELECT id, url_id, created_at FROM url_checks WHERE url_id = %s ORDER BY id DESC',
+                    (id,)
+                )
+                checks = cur.fetchall()
+                # print(checks):  [Record(id=27, url_id=11, created_at=datetime.date(2023, 6, 7)), ...]
+                # print(check.id):  27
     except psycopg2.Error:
         return None
     finally:
         conn.close()
     return render_template(
                     'urls/urls_id.html',
-                    result=result
+                    result=result,
+                    checks=checks
                 )
+
+
+@app.post('/urls/<int:id>')
+def url_checks(id):
+    conn = psycopg2.connect(DATABASE_URL)
+    with conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                    'SELECT id, name, created_at FROM urls WHERE id = %s LIMIT 1',
+                    (id,)
+                )
+            cur.execute('''
+                    INSERT INTO url_checks (url_id, created_at) values
+                    (%s, %s)
+                    ''',
+                    (id, datetime.datetime.now().date(),)
+                )
+    flash('Страница успешно проверена', 'success')
+    conn.commit()
+    conn.close()
+    # try:
+    #     with conn:
+    #         with conn.cursor(
+    #             cursor_factory=extras.NamedTupleCursor
+    #         ) as cur:
+    #             cur.execute(
+    #                 'SELECT id, name, created_at FROM urls WHERE id = %s LIMIT 1',
+    #                 (id,)
+    #             )
+    #             url = cur.fetchone()
+
+    #             cur.execute('''
+    #                 INSERT INTO url_checks (url_id, created_at) values
+    #                 (%s, %s)
+    #                 ''',
+    #                 (id, datetime.datetime.now().date(),)
+    #             )
+    #             flash('Страница успешно проверена', 'success')
+    #         conn.commit()
+    # except psycopg2.Error:
+    #     return None
+    # finally:
+    #     conn.close()
+    return redirect(url_for('get_url', id=id))
 
 
 def validate(url_from_request):
