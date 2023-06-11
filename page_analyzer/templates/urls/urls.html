@@ -13,15 +13,32 @@
           <th>Имя</th>
           <th>Последняя проверка</th>
           <th>Код ответа</th>
-        </tr>
-        {% for url in data %}
-        <tr>
-            <td>{{ url[0] }}</td>
-            <td><a href="{{ url_for('get_url', id=(url[0])) }}">
-              {{url[1]}}</a>
-            </td>
-        </tr>
-        {% endfor %}
+      </tr>
+      {% if data %}
+      {% for url, check in data %}
+      <tr>
+          <td>
+              {{ url.id }}
+          </td>
+          <td>
+              <a href="{{ url_for('get_url', id=url.id) }}">
+                  {{ url.name }}
+              </a>
+          </td>
+          {% if check %}
+          <td>
+              {{ check.created_at }}
+          </td>
+          <td>
+              {{ check.status_code }}
+          </td>
+          {% else %}
+          <td></td>
+          <td></td>
+          {% endif %}
+      </tr>
+      {% endfor %}
+      {% endif %}
       </tbody>
     </table>
   </div>

@@ -39,19 +39,51 @@ def get_urls():
     conn = psycopg2.connect(DATABASE_URL)
     try:
         with conn:
-            with conn.cursor() as cur:
+            '''with conn.cursor(cursor_factory=extras.NamedTupleCursor) as cur:
                 cur.execute('SELECT * FROM urls ORDER BY id DESC')
-                result = cur.fetchall()
+                result = cur.fetchone()
+                print(result)
+                _id = result.id
+                print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+
                 #  print(result) scheme: [(47, 'https://autoreview.ru', datetime.date(2023, 6, 5)), ...]
+            with conn.cursor(cursor_factory=extras.NamedTupleCursor) as cur:
+                cur.execute('SELECT * FROM url_checks ORDER BY url_id DESC')
+                status_and_date = cur.fetchall()
+                print('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB')'''
+                # print('status_code:', status_and_date)
+                # for item in status_and_date:
+                #     if item.url_id == _id:
+                #         status_and_date = item
+                # print('status_code:', status_and_date)
+              
+            with conn.cursor(cursor_factory=extras.NamedTupleCursor) as cur:
+                cur.execute(
+                    "SELECT * from urls order by id desc"
+                )
+
+                available_urls = cur.fetchall()
+
+                cur.execute(
+                    "SELECT DISTINCT on (url_id) * from url_checks "
+                    "order by url_id desc, id desc"
+                )
+
+                checks = cur.fetchall()
+                # data = list(zip(available_urls, checks))
+                # print('available_urls: ', available_urls)
+                # print('checks: ', checks)
+                # print('ZIIIIIIIP-data: ', data)
     except psycopg2.Error:
         return None
     finally:
         conn.close()
     return render_template(
         'urls/urls.html',
-        data=result
-        # checks=result['checks'],
-        # codes=result['status_codes']
+        data=list(zip(available_urls, checks))
+        # data=result,
+        # status_and_date=status_and_date,
+        # created_at=created_at
     )
 
 
@@ -156,11 +188,19 @@ def url_checks(id):
                     return redirect(url_for('get_url', id=id))
                 
                 soup = BeautifulSoup(response.text, 'html.parser')
-                title = soup.title.string
-                h1 = soup.h1.string
-                desc = soup.find("meta", property='og:description')
-                desc_content = desc.get("content")
-                print(desc_content)
+                if soup.find_all('h1'):
+                    h1 = soup.h1.string
+                else:
+                    h1 = ''
+                if soup.find_all('title'):
+                    title = soup.title.string
+                else:
+                    title = ''
+                if soup.find("meta", property='og:description'):
+                    desc = soup.find("meta", property='og:description')
+                    desc_content = desc.get("content")
+                else:
+                    desc_content = ''
 
                 cur.execute('''
                     INSERT INTO url_checks (url_id, status_code, h1, title, description, created_at) values
@@ -175,6 +215,16 @@ def url_checks(id):
     finally:
         conn.close()
     return redirect(url_for('get_url', id=id))
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('errors/404.html'), 404
+
+
+@app.errorhandler(500)
+def server_error(error):
+    return render_template('errors/500.html'), 500
 
 
 def validate(url_from_request):
