@@ -1,5 +1,7 @@
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/David-Roklem/python-project-83/workflows/hexlet-check/badge.svg)](https://github.com/David-Roklem/python-project-83/actions)
+[![lint_check](https://github.com/David-Roklem/python-project-83/actions/workflows/lint-check.yaml/badge.svg?branch=main)](https://github.com/David-Roklem/python-project-83/actions/workflows/lint-check.yaml)
+[![Maintainability](https://api.codeclimate.com/v1/badges/fe790627cc6e86b7db59/maintainability)](https://codeclimate.com/github/David-Roklem/python-project-83/maintainability)
 
 
 # python-project-83
