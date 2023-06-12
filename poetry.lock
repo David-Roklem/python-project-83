@@ -159,7 +159,7 @@ files = [
 name = "flake8"
 version = "6.0.0"
 description = "the modular source code checker: pep8 pyflakes and co"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.8.1"
 files = [
@@ -342,7 +342,7 @@ files = [
 name = "mccabe"
 version = "0.7.0"
 description = "McCabe checker, plugin for flake8"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -426,7 +426,7 @@ files = [
 name = "pycodestyle"
 version = "2.10.0"
 description = "Python style guide checker"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -438,7 +438,7 @@ files = [
 name = "pyflakes"
 version = "3.0.1"
 description = "passive checker of Python programs"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -584,4 +584,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<4.0.0"
-content-hash = "ebe2ac9d60d51e0b7a442cb9fa52b908073151ee9961ab1052490bfd0888c2ec"
+content-hash = "90217540f9d003836127844b78c9eb542595847c2903e937546d1752342f03aa"
