@@ -4,8 +4,9 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/fe790627cc6e86b7db59/maintainability)](https://codeclimate.com/github/David-Roklem/python-project-83/maintainability)
 
 
-# python-project-83
+# python-project-83 (Page analizer)
 This project deployed on Railway.app. Check it out [here](https://python-project-83-production-98c7.up.railway.app/)
+Page analizer is a Hexlet study project for students of Python-developer course. User can add a website to the main page and check its basic SEO-optimisation, such as HTTP status code, title and description.
 
 
 ## Getting Started
