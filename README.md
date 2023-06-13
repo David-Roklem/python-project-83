@@ -6,7 +6,7 @@
 
 # python-project-83 (Page analizer)
 This project deployed on Railway.app. Check it out [here](https://python-project-83-production-98c7.up.railway.app/)
-Page analizer is a Hexlet study project for students of Python-developer course. User can add a website to the main page and check its basic SEO-optimisation, such as HTTP status code, title and description.
+Page analyzer is a Hexlet study project for students of Python-developer course. User can add a website to the main page and check its basic SEO-optimisation, such as HTTP status code, title and description.
 
 
 ## Getting Started
